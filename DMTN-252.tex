@@ -1,0 +1,69 @@
+\documentclass[DM,authoryear,toc]{lsstdoc}
+\input{meta}
+
+% Package imports go here.
+
+% Local commands go here.
+
+%If you want glossaries
+%\input{aglossary.tex}
+%\makeglossaries
+
+\title{Convention for identifying bits in a mask/flags image in FITS}
+
+% Optional subtitle
+% \setDocSubtitle{A subtitle}
+
+\author{%
+Gregory Dubois-Felsmann
+}
+
+\setDocRef{DMTN-252}
+\setDocUpstreamLocation{\url{https://github.com/lsst-dm/dmtn-252}}
+
+\date{\vcsDate}
+
+% Optional: name of the document's curator
+% \setDocCurator{The Curator of this Document}
+
+\setDocAbstract{%
+Describes a convention used by the Vera C. Rubin Observatory and other projects for the identification of individual bits in a "flags image" or "mask image" - an integer-valued image in which individual bit planes are assigned to represent a set of Boolean values associated with individual pixels in an accompanying main image.  The convention supplies a symbolic name for each bit plane, and optionally a description string.  This convention applies to the serialization of such a "flags image" in FITS.
+}
+
+% Change history defined here.
+% Order: oldest first.
+% Fields: VERSION, DATE, DESCRIPTION, OWNER NAME.
+% See LPM-51 for version number policy.
+\setDocChangeRecord{%
+  \addtohist{1}{YYYY-MM-DD}{Unreleased.}{Gregory Dubois-Felsmann}
+}
+
+
+\begin{document}
+
+% Create the title page.
+\maketitle
+% Frequently for a technote we do not want a title page  uncomment this to remove the title page and changelog.
+% use \mkshorttitle to remove the extra pages
+
+% ADD CONTENT HERE
+% You can also use the \input command to include several content files.
+
+\appendix
+% Include all the relevant bib files.
+% https://lsst-texmf.lsst.io/lsstdoc.html#bibliographies
+\section{References} \label{sec:bib}
+\renewcommand{\refname}{} % Suppress default Bibliography section
+\bibliography{local,lsst,lsst-dm,refs_ads,refs,books}
+
+% Make sure lsst-texmf/bin/generateAcronyms.py is in your path
+\section{Acronyms} \label{sec:acronyms}
+\input{acronyms.tex}
+% If you want glossary uncomment below -- comment out the two lines above
+%\printglossaries
+
+
+
+
+
+\end{document}
