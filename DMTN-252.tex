@@ -57,7 +57,12 @@ This convention applies to the serialization of such a "flags image" in FITS.
 % You can also use the \input command to include several content files.
 
 It is a common convention in astronomical imaging pipelines to annotate the
-main images being processed with additional pixel arrays of the same shape
+main images\footnote{This term is used herein to mean whatever image is the
+principal concern of the processing --- a raw instrumental image, a
+calibrated instrumental image, a derived data product, etc.
+Often the pixel values of a ``main image'' may represent calibrated or
+uncalibrated fluxes, but that is not relevant to the discussion in this paper.}
+being processed with ancillary pixel arrays of the same shape
 as the main image, conveying additional information about each pixel.
 These additional arrays can convey quantitative information such as a
 variance or weight for each pixel, but it is often also useful to provide
@@ -71,7 +76,8 @@ further processing or science'' to purely informational states such as
 ``this pixel is part of a detected extended source''.
 Multiple flags may be associated with a single pixel by bit-packing
 them into an integer at designated bit positions.
-If compression is used for such an image, it must be lossless.
+Note that, because of the nature of thie representation, if compression
+is used for such an image, it must in general be lossless.
 
 In some cases this ``flags image'' or ``mask image'' (both terms are in
 general use in the community) is provided as an additional extension in
@@ -116,6 +122,8 @@ community's registry of conventions.
 The authors would welcome recommendations for the representation of
 equivalent information in other persistence formats for astronomical
 images, e.g., in ASDF.
+A corresponding convention for the annotation of bit positions in
+integer-valued table columns would also be of value to the community.
 
 This convention has its origins in internal data products produced
 within the Sloan Digital Sky Survey (SDSS) imaging pipelines (though
