@@ -27,7 +27,14 @@ Gregory Dubois-Felsmann
 % \setDocCurator{The Curator of this Document}
 
 \setDocAbstract{%
-Describes a convention used by the Vera C. Rubin Observatory and other projects for the identification of individual bits in a "flags image" or "mask image" - an integer-valued image in which individual bit planes are assigned to represent a set of Boolean values associated with individual pixels in an accompanying main image.  The convention supplies a symbolic name for each bit plane, and optionally a description string.  This convention applies to the serialization of such a "flags image" in FITS.
+Describes a convention used by the Vera C. Rubin Observatory and other projects
+for the identification of individual bits in a "flags image" or "mask image" -
+an integer-valued image in which individual bit planes are assigned to represent
+a set of Boolean values associated with individual pixels in an accompanying
+main image.
+The convention supplies a symbolic name for each bit plane, and optionally a
+description string.
+This convention applies to the serialization of such a "flags image" in FITS.
 }
 
 % Change history defined here.
@@ -43,11 +50,227 @@ Describes a convention used by the Vera C. Rubin Observatory and other projects 
 
 % Create the title page.
 \maketitle
-% Frequently for a technote we do not want a title page  uncomment this to remove the title page and changelog.
+% Frequently for a technote we do not want a title page uncomment this to remove the title page and changelog.
 % use \mkshorttitle to remove the extra pages
 
 % ADD CONTENT HERE
 % You can also use the \input command to include several content files.
+
+It is a common convention in astronomical imaging pipelines to annotate the
+main images being processed with additional pixel arrays of the same shape
+as the main image, conveying additional information about each pixel.
+These additional arrays can convey quantitative information such as a
+variance or weight for each pixel, but it is often also useful to provide
+Boolean ``flags'' on a per-pixel basis.
+
+Such flags may provide a variety of information about the progress and
+success or failure of the processing of the main image.
+Common meanings of such flags range from error states conveying ``this
+pixel's value in the main image is bad and should not be used for
+further processing or science'' to purely informational states such as
+``this pixel is part of a detected extended source''.
+Multiple flags may be associated with a single pixel by bit-packing
+them into an integer at designated bit positions.
+If compression is used for such an image, it must be lossless.
+
+In some cases this ``flags image'' or ``mask image'' (both terms are in
+general use in the community) is provided as an additional extension in
+a FITS serialization of the main image, while in other cases it may be
+delivered as a separate file.
+
+The data documentation for projects that provide such data will generally
+provide a list of flags by bit position and purpose or interpretation.
+
+Well-established conventions of software engineering suggest that the
+specific bit positions not be ``hard-coded'' into project software as
+bare constants, either as a bit position (e.g., 7) or as a mask (e.g.,
+\verb|0x80|).
+Symbolic names should be used instead.
+This can be, and has been, done in a variety of ways on different
+projects, from the use of C-style preprocessor constants to the use of
+dictionary-like mechanisms.
+
+Even if this is done, however, there is still the likelihood that the
+persisted file artifacts for such ``mask images'' cannot be readily
+understood by an end user without recourse to the documentation for
+the table of bit number mappings to meanings.
+This can be made more complicated by the likelihood that different
+categories of images created by a project (e.g., single-epoch images,
+coadded images, and image-like calibration data products) will use
+different sets of flags and therefore have different mappings.
+
+Furthermore, when images are displayed, it is highly desirable for
+image visualization tools to be capable of displaying the flags,
+for instance as semi-transparent overlays on the associated main
+images, and to allow users to interrogate and manipulate the
+visualization using the symbolic names for the flag bit positions,
+not just their bit numbers.
+
+Within several projects, enumerated below, it has therefore been seen
+as valuable to have a convention for encoding the symbolic names for
+the flag bit positions in the persisted image files.
+
+This document describes a convention for doing so in FITS persistence,
+and was written expressly in order to document this in the FITS
+community's registry of conventions.
+The authors would welcome recommendations for the representation of
+equivalent information in other persistence formats for astronomical
+images, e.g., in ASDF.
+
+This convention has its origins in internal data products produced
+within the Sloan Digital Sky Survey (SDSS) imaging pipelines (though
+to our knowledge it never appeared in publicly released SDSS images).
+It has been in use in the Vera C. Rubin Observatory's imaging
+pipelines since at least 20xx, and is available in the Rubin ``Data
+Previews'' that were opened to the community in 2021--2022.
+
+The convention is also in use in the publicly released data from
+the Hyper-Suprime-Cam (HSC) project, and is being used by the NASA
+SPHEREx space telescope (to be launched in 2025) image processing
+pipelines.
+
+The open-source Firefly astronomical data visualization package
+from Caltech/IPAC, used in the NASA Infrared Science Archive (IRSA),
+NASA Extragalactic Database (NED), and the NASA Exoplanet Archive,
+as well as in the Rubin Science Platform, supports the display and
+manipulation of ``mask images'' based on the convention presented
+herein.
+
+We are registering this convention in the hope that other projects
+and missions in the international astronomy community will choose
+to adopt it for their own data, and that the community will come to
+support it in a wider variety of visualization tools and software
+packages.
+
+\section{Explanation of the Convention}
+
+The principal purpose of this document is to describe a method for
+including symbolic names for bit positions in the headers of an
+individual integer-pixel-value image extension in FITS.
+We believe this alone to be of significant value and widespread
+applicability in the community.
+We also describe below a convention for how to structure a
+multi-extension FITS file to indicate the association of a ``mask
+image'' extension, with such headers, with one or more other
+image extensions, but this is of secondary importance.
+
+The core of this convention is the representation as FITS headers
+of a mapping between bit positions and short symbolic names for
+those bit positions.
+We also describe an optional mechanism for associating a longer
+documentation string with each symbolic name.
+
+An example of a mapping is shown in Table X.
+
+% \begin{tabular}
+X
+% \end{tabular}
+
+In this example, the convention would then lead to the inclusion
+of the following headers in the FITS extension containing the
+bit-packed integer image containing the flags:
+
+\verb|MP_X    = 0|
+
+\verb|HIERARCH MP_CROSSTALK = 1|
+
+The convention incorporates the use of the ESO \verb|HIERARCH|
+registered FITS convention,
+% https://fits.gsfc.nasa.gov/registry/hierarch_keyword.html
+relying on the statement in that document that ``The tokens may,
+however, be longer than the 8 character limit of formal FITS
+keywords'' in order to support symbolic names that are longer
+than 5 characters.
+The convention does not mandate the use of \verb|HIERARCH| for
+\emph{all} \verb|MP_*| keywords, despite the superficial
+consistency that might offer, in order to allow the present
+convention to be used even in contexts in which \verb|HIERARCH|
+is not supported, if the names are limited to 5 characters.
+
+In the existing practice for the use of this convention,
+e.g., in the Rubin Observatory software, the same mapping applies
+to every image in the same category --- e.g., all calibrated
+single-epoch images would share the same flag bit positions.
+However, note that that is not a requirement of this convention,
+as the entire point is to allow each such image to be understood
+in isolation, based only upon the headers actually present.
+
+
+\subsection{Optional Support for Documentation Strings}
+
+\subsection{Suggestions for Implementation}
+
+Community-facing libraries wishing to provide support for this
+convention should permit users to query the status of individual
+planes based on their symbolic names alone.
+Note that as the name-to-bit-position mapping is image metadata,
+in such a library the mapping cannot be represented by compile-time
+constants (e.g., C preprocessor macros).
+
+Image visualization software supporting this convention should
+provide at least the following features:
+
+Display the mapping itself.
+
+Allow a user to specify, by their symbolic names, which flags
+(i.e., which bit positions) should be visible in the visualization.
+
+Display the names of the flags which are "true" (bit value 1)
+for a given pixel in the same contexts in which the software
+displays what the pixel value of a non-flags image is.
+
+Support the visualization of a ``mask image'' in conjunction
+with an associated main image (e.g., a flux image), including
+both in the image display itself (perhaps as a semi-transparent
+overlay), and in whatever UI element the tool uses to display
+the ordinary pixel values (e.g., fluxes) of the main image.
+
+\section{Formal Statement of the Convention}
+
+This section describes the behavior of ``conforming implementations'';
+i.e., software that supports either reading or writing bit-packed
+Boolean flags as image pixel data and that provides behavior aligned
+with this convention.
+The standards-vocabulary terms ``shall'', ``should'', ``may'',
+``should  not'', and ``must not'' in this section should be interpreted
+as relative to that goal.
+
+\subsection{Writing}
+
+A conforming implementation shall support the input and/or output of
+data in the FITS image
+
+A conforming implementation \strong{must not} output negative bit position
+numbers in the \verb|MP_*| headers, or bit position numbers exceeding the
+available number of bits in the extension's pixel values.
+
+A conforming implementation \strong{must not} use lossy compression on
+a FITS extension containing bit-packed pixel flags.
+
+\subsection{Reading}
+
+A conforming implementation shall support the input of data in the FITS
+image extension formats (image or compressed image) ...
+
+A conforming implementation shall treat an extension as containing
+bit-packed pixel flags if a) it is an integer image or compressed image
+extension, b) it has one or more headers beginning with \verb|MP_| or
+\verb|HIERARCH MP_| with FITS-header-key conformant names and non-negative
+integer values, c) the integer values of such headers do not exceed the
+number of bits in the integer pixel values of the extension, and d) any
+compression used internal to the extension is lossless.
+
+A conforming implementation \strong{may} process extensions in this way
+even if \verb|MP_| headers are present with integer values exceeding the
+bit width of tthe pixel values, but \strong{should} issue a warning in
+such situations.
+
+A conforming implementation \strong{must} issue an error if a compressed
+image extension otherwise meeting the above criteria was compressed with a
+lossy algorithm.
+
+
+\section{Survey of Existing Practice}
 
 \appendix
 % Include all the relevant bib files.
